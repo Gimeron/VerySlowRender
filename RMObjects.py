@@ -27,7 +27,7 @@ class RMWorld():
             if curDist < minDist:
                 minDist = curDist
                 nearObject = i
-        return (minDist, i)      # distanse and object
+        return (minDist, nearObject)      # distanse and object
 
     def raymarch(self, startPoint, vectorDirect, listObjects=[], curCam=Camera()):
         p = startPoint.copy()   # start from startpoint
@@ -73,14 +73,18 @@ class RMWorld():
                     distToPoint = vectorToPoint.mag()
                 else:                      # if not found
                     distToPoint = curCam.distLimit * 2.0   #  )
-                                
+                    
                 pxIndex = (imgY-1) * camImage.width + (imgX-1)
                 
                 if ((pxIndex % 500) == 0) and self.ShowProgress:
                     print("Lines: "+str(imgY)+"/"+str(imageSize[1]) + "   Rays: "+str(pxIndex)+"/"+str(imageSize[0]*imageSize[1]) + "   " + str( imgY*10000/imageSize[1]/100.0) + "%")
-                pxColor = int(curCam.lightPower/(distToPoint/self.pixelPerMeter)**2)
+                pxLight = int(curCam.lightPower/(distToPoint/self.pixelPerMeter)**2)
+                if nearObject != False:
+                    pxColor = nearObject.color
+                else:
+                    pxColor = [255, 255, 255]
                 #TODO: Check array overflow
-                camImage.pixels[pxIndex] = color( pxColor, pxColor, pxColor  )
+                camImage.pixels[pxIndex] = color( pxLight*float(pxColor[0]/255.0), pxLight*float(pxColor[1]/255.0), pxLight*float(pxColor[2]/255.0)  )
                 imgX +=1
             imgY +=1
         camImage.updatePixels()
@@ -99,7 +103,9 @@ class PointObject():
 class SphereObject(PointObject):
     def __init__(self, pos=Vector3(0, 0, 0), radius=1):
         PointObject.__init__(self, pos)
+        self.type = "Sphere"
         self.radius = radius
+        self.color = [255,255,255]
         
     def getDist(self, pointTest=Vector3(0, 0, 0)):
         distToCenter = ((pointTest.x-self.pos.x)**2 + (pointTest.y-self.pos.y)**2 + (pointTest.z-self.pos.z)**2)**0.5
@@ -109,9 +115,11 @@ class SphereObject(PointObject):
 class PlainObject(PointObject):
     def __init__(self, pos=Vector3(0, 0, 0), roll=0, pitch=0, yaw=0):
         PointObject.__init__(self, pos)
+        self.type = "Plain"
         self.roll  = roll
         self.pitch = pitch
         self.yaw   = yaw
+        self.color = [255,255,255]
     
     def getDist(self, pointTest=Vector3(0, 0, 0)):
         _p = pointTest.copy()
@@ -123,10 +131,12 @@ class PlainObject(PointObject):
 class BoxObject(PointObject):
     def __init__(self, pos=Vector3(0, 0, 0), size=Vector3(1, 1, 1), roll=0, pitch=0, yaw=0):
         PointObject.__init__(self, pos)
+        self.type = "Box"
         self.size=size
         self.roll  = roll
         self.pitch = pitch
         self.yaw   = yaw
+        self.color = [255,255,255]
 
     def getDist(self, pointTest=Vector3(0, 0, 0)):
         _p = pointTest.copy()
