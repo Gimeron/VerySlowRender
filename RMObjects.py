@@ -54,27 +54,26 @@ class RMWorld():
         camImage.loadPixels()
         
         # run
-        imgY = 0
-        imgX = 0
         pxIndex = 0
-        for aY in my_range(-camViewAngleY/2, camViewAngleY/2, camViewAngleY/float(imageSize[1])):      # rows
-            imgX = 0
-            for aX in my_range(-camViewAngleX/2, camViewAngleX/2, camViewAngleX/float(imageSize[0])):  # cols
+        for imgY in range(imageSize[1]):
+            aY = -camViewAngleY/2 + camViewAngleY * (float(imgY)/imageSize[1])
+            for imgX in range(imageSize[0]):
+                aX = -camViewAngleX/2 + camViewAngleX * (float(imgX)/imageSize[0])
                 vectorDirect = Vector3(0, 0, 1) 
                 vectorDirect.rotateY(aX)
                 vectorDirect.rotateEuler(curCam.roll, curCam.pitch + aY, curCam.yaw)
-                # ready and go
+                # ready to let the beem
                 startPoint = curCam.pos.copy()
                 
                 pointOfObject, nearObject = self.raymarch(startPoint, vectorDirect, self.Objects, curCam)
                 if nearObject != False:   # if found
                     vectorToPoint = pointOfObject.copy()
                     vectorToPoint.sub(startPoint)
-                    distToPoint = vectorToPoint.mag()
+                    distToPoint = vectorToPoint.mag()     # near
                 else:                      # if not found
-                    distToPoint = curCam.distLimit * 2.0   #  )
+                    distToPoint = curCam.distLimit * 2.0  # too far
                     
-                pxIndex = (imgY-1) * camImage.width + (imgX-1)
+                pxIndex = imgY * camImage.width + imgX
                 
                 if ((pxIndex % 500) == 0) and self.ShowProgress:
                     print("Lines: "+str(imgY)+"/"+str(imageSize[1]) + "   Rays: "+str(pxIndex)+"/"+str(imageSize[0]*imageSize[1]) + "   " + str( imgY*10000/imageSize[1]/100.0) + "%")
@@ -83,7 +82,6 @@ class RMWorld():
                     pxColor = nearObject.color
                 else:
                     pxColor = [255, 255, 255]
-                #TODO: Check array overflow
                 camImage.pixels[pxIndex] = color( pxLight*float(pxColor[0]/255.0), pxLight*float(pxColor[1]/255.0), pxLight*float(pxColor[2]/255.0)  )
                 imgX +=1
             imgY +=1
@@ -155,3 +153,37 @@ class BoxObject(PointObject):
         qo.z = max(qo.z, 0.0)
         
         return qo.mag() + min(max(qo.x, qo.y, qo.z), 0.0)
+
+
+class RoundedBoxObject(PointObject):
+    def __init__(self, pos=Vector3(0, 0, 0), size=Vector3(1, 1, 1), radius=0, roll=0, pitch=0, yaw=0):
+        PointObject.__init__(self, pos)
+        self.type = "Box"
+        self.size=size
+        self.radius = radius
+        self.roll  = roll
+        self.pitch = pitch
+        self.yaw   = yaw
+        self.color = [255,255,255]
+
+    def getDist(self, pointTest=Vector3(0, 0, 0)):
+        _p = pointTest.copy()
+        _p.sub(self.pos)
+        _p.rotateEuler(-self.yaw, -self.pitch, -self.roll)
+        
+        _p.x = abs(_p.x)
+        _p.y = abs(_p.y)
+        _p.z = abs(_p.z)
+        _q = _p.copy()
+        _q.sub(self.size)
+        
+        _q.x += self.radius
+        _q.y += self.radius
+        _q.z += self.radius
+        
+        qo = _q.copy()
+        qo.x = max(qo.x, 0.0)
+        qo.y = max(qo.y, 0.0)
+        qo.z = max(qo.z, 0.0)
+        
+        return qo.mag() + min(max(qo.x, qo.y, qo.z), 0.0) - self.radius

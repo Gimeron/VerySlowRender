@@ -6,7 +6,7 @@
 
 
 from pyVector import Vector3
-from RMObjects import PointObject, SphereObject, PlainObject, BoxObject, RMWorld
+from RMObjects import PointObject, SphereObject, PlainObject, BoxObject, RoundedBoxObject, RMWorld
 from RMCamera import Camera
 
 
@@ -23,10 +23,10 @@ def my_range(numStart, numEnd, step):
 world = RMWorld()
 
 
-SceneImageWidth=192
-SceneImageHeight=108
+SceneImageWidth=192*4
+SceneImageHeight=108*4
 
-SaveImage = False
+SaveImage = True
 
 def setup():
     background(0)
@@ -34,24 +34,24 @@ def setup():
     
     # Пополним мир объектами
     world.Objects.append( SphereObject(Vector3(-40,210,15), 40) )
-    world.Objects[0].color=[240,96,32]
-    world.Objects.append( BoxObject(Vector3(20,170,-25+2+8*0), Vector3(40,40,4), -0*PI/12,0,0) ) #1
-    world.Objects[1].color=[0,240,0]
-    world.Objects.append( BoxObject(Vector3(20,170,-25+2+8*1), Vector3(40,40,4), -1*PI/12,0,0) ) #2
-    world.Objects[2].color=[80,240,0]
-    world.Objects.append( BoxObject(Vector3(20,170,-25+2+8*2), Vector3(40,40,4), -2*PI/12,0,0) ) #3
-    world.Objects[3].color=[160,240,0]
-    world.Objects.append( BoxObject(Vector3(20,170,-25+2+8*3), Vector3(40,40,4), -3*PI/12,0,0) ) #4
-    world.Objects[4].color=[240,240,0]
-    world.Objects.append( BoxObject(Vector3(20,170,-25+2+8*4), Vector3(40,40,4), -4*PI/12,0,0) ) #5
-    world.Objects[5].color=[240,160,0]
-    world.Objects.append( BoxObject(Vector3(20,170,-25+2+8*5), Vector3(40,40,4), -5*PI/12,0,0) ) #6
-    world.Objects[6].color=[240,80,0]
-    world.Objects.append( BoxObject(Vector3(20,170,-25+2+8*6), Vector3(40,40,4), -6*PI/12,0,0) ) #7
-    world.Objects[7].color=[240,0,0]
+    world.Objects[0].color=[240,120,60]
+    world.Objects.append( RoundedBoxObject(Vector3(20,170,-25+2+8*0), Vector3(40,40,4), 2, -0*PI/12,0,0) ) #1
+    world.Objects[1].color=[255,255,255]
+    world.Objects.append( RoundedBoxObject(Vector3(20,170,-25+2+8*1), Vector3(40,40,4), 2, -1*PI/12,0,0) ) #2
+    world.Objects[2].color=[240,80,240]
+    world.Objects.append( RoundedBoxObject(Vector3(20,170,-25+2+8*2), Vector3(40,40,4), 2, -2*PI/12,0,0) ) #3
+    world.Objects[3].color=[80,80,240]
+    world.Objects.append( RoundedBoxObject(Vector3(20,170,-25+2+8*3), Vector3(40,40,4), 2, -3*PI/12,0,0) ) #4
+    world.Objects[4].color=[80,240,240]
+    world.Objects.append( RoundedBoxObject(Vector3(20,170,-25+2+8*4), Vector3(40,40,4), 2, -4*PI/12,0,0) ) #5
+    world.Objects[5].color=[80,240,80]
+    world.Objects.append( RoundedBoxObject(Vector3(20,170,-25+2+8*5), Vector3(40,40,4), 2, -5*PI/12,0,0) ) #6
+    world.Objects[6].color=[240,240,80]
+    world.Objects.append( RoundedBoxObject(Vector3(20,170,-25+2+8*6), Vector3(40,40,4), 2, -6*PI/12,0,0) ) #7
+    world.Objects[7].color=[240,80,80]
     # Земля
     world.Objects.append( PlainObject(Vector3(20,170,-25), 0, 0, 0) ) #8
-    world.Objects[8].color=[96,240,32]
+    world.Objects[8].color=[160,240,80]
     # Камера
     world.Cameras.append( Camera(Vector3(-60, 40, 90)) )
     
@@ -69,10 +69,10 @@ def draw():
     mainCamera = world.Cameras[0]
     mainCamera.pitch = PI/2 + PI/6
     mainCamera.yaw = PI/6 + -PI/24
-    mainCamera.viewAngle = PI/2.333
+    mainCamera.viewAngle = PI/2.333/2
     
-    mainCamera.stepCountLimit = 100
-    mainCamera.minRange = 0.5
+    mainCamera.stepCountLimit = 200
+    mainCamera.minRange = 0.25
     
     
     renderImage1 = world.scan(mainCamera, [SceneImageWidth, SceneImageHeight])
