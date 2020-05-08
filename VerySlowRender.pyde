@@ -11,7 +11,6 @@ from RMCamera import Camera
 
 
 Debug = True           # Режим отладки
-SaveImage = False
 
 
 def my_range(numStart, numEnd, step):
@@ -23,8 +22,8 @@ def my_range(numStart, numEnd, step):
 world = RMWorld()
 
 
-SceneImageWidth=192*4
-SceneImageHeight=108*4
+SceneImageWidth=int(192*1)
+SceneImageHeight=int(108*1)
 
 SaveImage = True
 
@@ -51,7 +50,7 @@ def setup():
     world.Objects[7].color=[240,80,80]
     # Земля
     world.Objects.append( PlainObject(Vector3(20,170,-25), 0, 0, 0) ) #8
-    world.Objects[8].color=[160,240,80]
+    world.Objects[8].color=[80,120,60]
     # Камера
     world.Cameras.append( Camera(Vector3(-60, 40, 90)) )
     
@@ -69,7 +68,7 @@ def draw():
     mainCamera = world.Cameras[0]
     mainCamera.pitch = PI/2 + PI/6
     mainCamera.yaw = PI/6 + -PI/24
-    mainCamera.viewAngle = PI/2.333/2
+    mainCamera.viewAngle = PI/2.333/1.0
     
     mainCamera.stepCountLimit = 200
     mainCamera.minRange = 0.25

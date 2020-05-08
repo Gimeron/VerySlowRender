@@ -15,7 +15,7 @@ class RMWorld():
         self.Objects=[]
         self.Cameras=[]
         self.Lights=[]
-        self.pixelPerMeter = 100
+        self.pixelPerMeter = 100.0
         self.ShowProgress = False
         self.Debug = False
 
@@ -67,21 +67,48 @@ class RMWorld():
                 
                 pointOfObject, nearObject = self.raymarch(startPoint, vectorDirect, self.Objects, curCam)
                 if nearObject != False:   # if found
+                    # calculate distance to the point
                     vectorToPoint = pointOfObject.copy()
                     vectorToPoint.sub(startPoint)
                     distToPoint = vectorToPoint.mag()     # near
+                    # calculate the normal vector (gradient around the point)
+                    # need test 4 point
+                    eps = 0.1 # point neighborhood size
+                    z0, someObject = self.getDist(Vector3(pointOfObject.x, pointOfObject.y, pointOfObject.z), self.Objects, curCam.distLimit)
+                    z1, someObject = self.getDist(Vector3(pointOfObject.x + eps, pointOfObject.y, pointOfObject.z), self.Objects, curCam.distLimit)
+                    z2, someObject = self.getDist(Vector3(pointOfObject.x, pointOfObject.y + eps, pointOfObject.z), self.Objects, curCam.distLimit)
+                    z3, someObject = self.getDist(Vector3(pointOfObject.x, pointOfObject.y, pointOfObject.z + eps), self.Objects, curCam.distLimit)
+                    gradient = Vector3(z1-z0, z2-z0, z3-z0)
+                    normalVector = gradient.copy()
+                    normalVector.normalize() # ready normal vector will be used in the calculation of the color
+                    
                 else:                      # if not found
                     distToPoint = curCam.distLimit * 2.0  # too far
                     
                 pxIndex = imgY * camImage.width + imgX
                 
+                # progress log
                 if ((pxIndex % 500) == 0) and self.ShowProgress:
                     print("Lines: "+str(imgY)+"/"+str(imageSize[1]) + "   Rays: "+str(pxIndex)+"/"+str(imageSize[0]*imageSize[1]) + "   " + str( imgY*10000/imageSize[1]/100.0) + "%")
-                pxLight = int(curCam.lightPower/(distToPoint/self.pixelPerMeter)**2)
+                
+                # calc point color
                 if nearObject != False:
-                    pxColor = nearObject.color
+                    hitDirectionVector = vectorDirect.copy()
+                    hitDirectionVector.setMag(-1.0)
+                    lightDirectionVector = Vector3(0,0,1)
+                    normalDirectionVector = normalVector.copy()
+                    
+                    # pxLight = float(curCam.lightPower/(distToPoint/self.pixelPerMeter)**2) # depth map
+                    pxLight = normalDirectionVector.dot(lightDirectionVector) # return -1.0 .. 1.0 from lamp
+                    # pxLight = normalDirectionVector.dot(hitDirectionVector) # return -1.0 .. 1.0 from camera
+                    
+                    pxLight = pxLight * 127.0 + 127.0     # soft light
+                    
+                    pxColor = [nearObject.color[0], nearObject.color[1], nearObject.color[2]]
+                    # pxColor=[255,255,255]
                 else:
                     pxColor = [255, 255, 255]
+                
                 camImage.pixels[pxIndex] = color( pxLight*float(pxColor[0]/255.0), pxLight*float(pxColor[1]/255.0), pxLight*float(pxColor[2]/255.0)  )
                 imgX +=1
             imgY +=1

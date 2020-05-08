@@ -1,7 +1,7 @@
 from pyVector import Vector3
 
 class Camera():
-    def __init__(self, pos=Vector3(0,0,0), roll=0, pitch=0, yaw=0, viewAngle=PI/4, aspectRatio=1.6, stepCountLimit=100, distLimit=1000, minRange=0.25, lightPower=255):
+    def __init__(self, pos=Vector3(0,0,0), roll=0, pitch=0, yaw=0, viewAngle=PI/4, aspectRatio=1.6, stepCountLimit=100, distLimit=1000, minRange=0.25, lightPower=1.0):
         self.pos   = pos
         self.roll  = roll
         self.pitch = pitch
